@@ -8,6 +8,7 @@ import { SdkMethod } from '../analyzer/methods'
 import { SdkMethodParams } from '../analyzer/params'
 import { resolveRouteWith, unparseRoute } from '../analyzer/route'
 import { normalizeExternalFilePath, ResolvedTypeDeps } from '../analyzer/typedeps'
+import { config } from '../config'
 import { panic } from '../logging'
 
 /**
@@ -77,9 +78,16 @@ export function generateSdkModules(modules: SdkModules): Map<string, string> {
       }
 
       for (const [file, types] of imports) {
-        out.push(
-          `import type { ${types.join(', ')} } from "../_types/${normalizeExternalFilePath(file.replace(/\\/g, '/')).replace(/\\/g, '/')}";`
-        )
+        if (Object.keys(config.peerDependencies ?? []).includes(file)) {
+          out.push(`import type { ${types.join(', ')} } from "${file}";`)
+        } else {
+          out.push(
+            `import type { ${types.join(', ')} } from "../_types/${normalizeExternalFilePath(file.replace(/\\/g, '/')).replace(
+              /\\/g,
+              '/'
+            )}";`
+          )
+        }
       }
 
       out.push('')

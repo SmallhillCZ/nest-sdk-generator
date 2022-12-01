@@ -10,6 +10,7 @@ import { Config } from '../config'
 import { debug, panic, println } from '../logging'
 import { generateSdkModules } from './genmodules'
 import { generateSdkTypeFiles } from './gentypes'
+import { generatePackageJson } from './packageJson'
 import { findPrettierConfig, prettify } from './prettier'
 import { defaultSdkInterface } from './sdk-interface'
 
@@ -89,4 +90,8 @@ export default async function generatorCli(config: Config, sdkContent: SdkConten
 
     fs.writeFileSync(sdkInterfacePath, defaultSdkInterface, 'utf8')
   }
+
+  println('> Generating package.json...')
+
+  writeScriptTo(output, 'package.json', generatePackageJson(sdkContent))
 }

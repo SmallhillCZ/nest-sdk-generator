@@ -48,6 +48,12 @@ export interface Config {
 
   /** Write generation timestamp in each TypeScript file (enabled by default) */
   readonly generateTimestamps?: boolean
+
+  /** Specify peer dependencies of npm libraries whose types will not be included in the SDK and will be expected to be part of the target project */
+  readonly peerDependencies?: { [key: string]: string }
+
+  /** Name to be used in SDK's package.json */
+  readonly name?: string
 }
 
 /**

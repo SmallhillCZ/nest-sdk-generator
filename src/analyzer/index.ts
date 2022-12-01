@@ -14,6 +14,7 @@ import { flattenSdkResolvedTypes, locateTypesFile, TypesExtractor, TypesExtracto
 export interface SdkContent {
   readonly modules: SdkModules
   readonly types: TypesExtractorContent
+  readonly version: string
 }
 
 export interface MagicType {
@@ -110,6 +111,8 @@ export async function analyzerCli(config: Config): Promise<SdkContent> {
   debug('\n==== Extracting {} type' + (typesToExtract.length > 1 ? 's' : '') + ' ====\n', typesToExtract.length)
 
   for (const loc of typesToExtract) {
+    if (Object.keys(config.peerDependencies ?? []).includes(loc.relativePathNoExt)) continue
+
     const result = typesCache.extractType(loc)
 
     if (result instanceof Error) {
@@ -117,9 +120,16 @@ export async function analyzerCli(config: Config): Promise<SdkContent> {
     }
   }
 
+  let packageJson: any = {}
+  const packageJsonPath = path.join(sourcePath, 'package.json')
+  if (fs.existsSync(packageJsonPath)) {
+    packageJson = JSON.parse(fs.readFileSync(packageJsonPath).toString())
+  }
+
   const content: SdkContent = {
     modules,
     types: typesCache.extracted,
+    version: packageJson.version ?? '0.0.0',
   }
 
   if (config.jsonOutput) {
